@@ -1,44 +1,24 @@
 package os1;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
 
 public class Provider {
-    private static int bufferSize = 10;
+    private static String inputPath = "Input.txt";
 
-    public static ArrayList<String> deliverData(String path) {
-        System.out.println();
-        System.out.println("[info] Provider: Run ...");
-        System.out.println("[info] Provider: thread id = " + Thread.currentThread().getId() + ";");
-        System.out.println("[info] Provider: start to download data from root/" + path + " to buffers;");
-        ArrayList<String> buffers = new ArrayList<>();
-        try {
-            Reader reader = new FileReader(path);
-            BufferedReader bufferReader = new BufferedReader(reader);
-            String file = "";
-            String read;
-            while (null != (read = bufferReader.readLine())) {
-                file = file.concat(read + "\n");
+    public static void main(String[] args) throws InterruptedException, IOException {
+        Reader reader = new FileReader(inputPath);
+        BufferedReader bufferReader = new BufferedReader(reader);
+        String read;
+        while (null != (read = bufferReader.readLine())) {
+            while (!MainThread.workProvider) {
+                Thread.currentThread().sleep(1000);
             }
-            while (file.length() > 0){
-                if (file.length() > bufferSize){
-                    buffers.add(file.substring(0, bufferSize - 1));
-                    file = file.substring(bufferSize - 1);
-                } else {
-                    buffers.add(file);
-                    file = "";
-                }
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("[error] File not found!");
-
-        } catch (Exception e) {
-            System.out.println("[error] Exception!");
+            MainThread.buffer = read;
+            MainThread.workProvider = false;
+            MainThread.workHandler = true;
         }
-        System.out.println("[info] Provider: received " + buffers.size() + " buffers;");
-        return buffers;
     }
 }

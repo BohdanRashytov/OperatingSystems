@@ -1,57 +1,43 @@
 package os1;
 
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.concurrent.*;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainThread {
-    private static String inputPath = "Input.txt";
-    private static String outputPath = "Output.txt";
+    public static Boolean workProvider = true;
+    public static Boolean workHandler = false;
+    public static Boolean workConsumer = false;
 
+    public static String buffer = "";
     private static ExecutorService executor = Executors.newCachedThreadPool();
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
 
-        System.out.println("[info] Main: Start ...");
-        System.out.println("[info] Main: thread id = " + Thread.currentThread().getId() + ";");
-        Future<ArrayList<String>> data = executor.submit(new Callable<ArrayList<String>>() {
-            public ArrayList<String> call() {
-                return Provider.deliverData(inputPath);
+
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Provider.main(args);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
-        Future<ArrayList<String>> processedData = executor.submit(new Callable<ArrayList<String>>() {
-            public ArrayList<String> call() {
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    if (data.get().size() > 0)
-                        return Handler.processData(data.get());
-                    return new ArrayList<>();
+                    Handler.main(args);
                 } catch (InterruptedException e) {
-                    System.out.println("[error] InterruptedException!");
-                } catch (ExecutionException e) {
-                    System.out.println("[error] ExecutionException!");
+                    e.printStackTrace();
                 }
-                return new ArrayList<>();
             }
         });
-
-        Boolean result = executor.submit(new Callable<Boolean>() {
-            public Boolean call() {
-                try {
-                    if (processedData.get().size() > 0)
-                        return Consumer.writeData(processedData.get(), outputPath);
-                    else return false;
-                } catch (InterruptedException e) {
-                    System.out.println("[error] InterruptedException!");
-                } catch (ExecutionException e) {
-                    System.out.println("[error] ExecutionException!");
-                }
-                return false;
-            }
-        }).get();
-        System.out.println();
-        System.out.println("[info] Main: success = " + result + ";");
-        System.out.println("[info] Main: Finish!");
-        executor.shutdown();
     }
 }

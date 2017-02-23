@@ -1,19 +1,14 @@
 package os1;
 
-
-import java.util.ArrayList;
-
 public class Handler {
-    public static ArrayList<String> processData(ArrayList<String> buffers) {
-        System.out.println();
-        System.out.println("[info] Handler: Run ...");
-        System.out.println("[info] Handler: thread id = " + Thread.currentThread().getId() + ";");
-        System.out.println("[info] Handler: data received;");
-        ArrayList<String> buffersCopy = new ArrayList<>();
-        for (String buffer : buffers) {
-            buffersCopy.add(buffer.toLowerCase());
+    public static void main(String[] args) throws InterruptedException {
+        while (true) {
+            while (!MainThread.workHandler) {
+                Thread.currentThread().sleep(1000);
+            }
+            MainThread.buffer = MainThread.buffer.toLowerCase();
+            MainThread.workHandler = false;
+            MainThread.workConsumer = true;
         }
-        System.out.println("[info] Handler: data processed;");
-        return buffersCopy;
     }
 }
