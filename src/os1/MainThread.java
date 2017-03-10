@@ -39,5 +39,18 @@ public class MainThread {
                 }
             }
         });
+
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Consumer.main(args);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }
